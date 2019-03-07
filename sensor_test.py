@@ -7,7 +7,16 @@ class TestFernsehserien(unittest.TestCase):
     Test the parser
     """
 
-    test_data = [ 'doctor-who-2005', 'the-big-bang-theory', 'suits', 'vikings', 'hubert-ohne-staller', 'game-of-thrones', 'young-sheldon']
+    test_data = [
+        'brooklyn-nine-nine',
+        'doctor-who-2005',
+        'the-big-bang-theory',
+        'suits',
+        'vikings',
+        'hubert-ohne-staller',
+        'game-of-thrones',
+        'young-sheldon'
+    ]
 
     def test_parse(self):
         """
