@@ -142,6 +142,7 @@ def parseResponse(response):
     for season in seasons:
         episodes = season('tr').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'episode').items()
         for episode in episodes:
+            try:
                 episodeData = {}
                 episode_number_obj_list = list(episode('td>a').items())
                 season_number = episode_number_obj_list[3].text().replace('.', '')
@@ -161,6 +162,8 @@ def parseResponse(response):
                 if episodeData['airDate'] < time.gmtime()[:3]:
                     continue
                 showData['episodes'].append(episodeData)
+            except ValueError as e:
+                _LOGGER.warning("Unexpected error during parsing episode data of season: " + season('tr>td>h2').text())
     return showData
 
 def get_date(zone, offset=0):
