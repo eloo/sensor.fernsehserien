@@ -20,7 +20,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -128,11 +128,28 @@ class FernsehserienUpcomingMediaSensor(Entity):
             else:
                 self._state = '%s cannot be reached' % self.host
 
+def parse_episode_number(episode):
+    number = episode[4].text()
+    if not number:
+        number = episode[3].text()
+    episode_number =  int(number)
+    return episode_number
+
+def parse_episode_airdate(episode):
+    ea = episode[7].remove('span').text()
+    airdate = ''
+    try:
+        airdate = time.strptime(ea, "%d.%m.%Y")
+    except ValueError as e:
+        ea = episode[6].remove('span').text()
+        airdate = time.strptime(ea, "%d.%m.%Y")
+    return airdate
+
 
 def parseResponse(response):
     from pyquery import PyQuery    
     pq = PyQuery(response.text)
-    show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').text()
+    show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
     seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'season').items()
     showData = {}
     fanartUrl = pq('div>a>img').attr['src']
@@ -149,15 +166,12 @@ def parseResponse(response):
                 episodeData['seasonNumber'] = season_number
                 episode_title = episode('td>a>span').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
                 episodeData['title'] = episode_title
-                episode_ea = episode_number_obj_list[7].remove('span').text()
-                if season_number is '' or episode_title is '' or episode_ea is '':
+                if season_number is '' or episode_title is '':
                     continue
                 season_number = int(season_number)
-                if not episode_number_obj_list[4].text():
-                    continue
-                episode_number =  int(episode_number_obj_list[4].text())
+                episode_number =  parse_episode_number(episode_number_obj_list)
                 episodeData['seasonNumber'] = season_number
-                episodeData['airDate'] = time.strptime(episode_ea, "%d.%m.%Y")
+                episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
                 episodeData['episodeNumber'] = episode_number
                 if episodeData['airDate'] < time.gmtime()[:3]:
                     continue
