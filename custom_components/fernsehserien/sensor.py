@@ -31,7 +31,7 @@ CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
 CONF_MAX = 'max'
 
-DOMAIN = 'custom_updater'
+DOMAIN = 'fernsehserien_upcoming_media'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_SHOW_NAME): cv.ensure_list,
@@ -178,7 +178,7 @@ def parseResponse(response):
                     continue
                 showData['episodes'].append(episodeData)
             except ValueError as e:
-                _LOGGER.warning("Unexpected error during parsing episode data of season: " + season('tr>td>h2').text())
+                _LOGGER.warning("Unexpected error during parsing episode data of: " + showData['title'] + " " + season('tr>td>h2').text())
     return showData
 
 def get_date(zone, offset=0):

@@ -15,7 +15,8 @@ class TestFernsehserien(unittest.TestCase):
         'vikings',
         'hubert-ohne-staller',
         'game-of-thrones',
-        'young-sheldon'
+        'young-sheldon',
+        'gomorrha-die-serie'
     ]
 
     def test_parse(self):

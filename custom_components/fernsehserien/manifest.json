@@ -1,0 +1,8 @@
+{
+    "domain": "fernsehserien_upcoming_media",
+    "name": "Scrapper for fernsehserien.de",
+    "documentation": "n/a",
+    "dependencies": [],
+    "codeowners": [],
+    "requirements": ["pyquery==1.4.0"]
+  }
