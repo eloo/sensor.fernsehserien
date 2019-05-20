@@ -20,7 +20,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.4'
+__version__ = '0.1.0'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
 CONF_MAX = 'max'
 
+DOMAIN = 'custom_updater'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_SHOW_NAME): cv.ensure_list,
