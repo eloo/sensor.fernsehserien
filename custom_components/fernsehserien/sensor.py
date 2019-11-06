@@ -20,7 +20,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -123,6 +123,8 @@ class FernsehserienUpcomingMediaSensor(Entity):
             if api_response.status_code == 200:
                 self._state = 'Online'
                 data = parseResponse(api_response)
+                # if episodeData['airDate'] < time.gmtime()[:3]:
+                #     continue
                 # data = list(filter(lambda x: x['airDate'] > time.gmtime(), data))
                 result.append(data)
                 self.data = result
@@ -151,7 +153,7 @@ def parseResponse(response):
     from pyquery import PyQuery    
     pq = PyQuery(response.text)
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
-    seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'season').items()
+    seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
     showData = {}
     fanartUrl = pq('div>a>img').attr['src']
     showData['fanart'] = fanartUrl
@@ -174,8 +176,6 @@ def parseResponse(response):
                 episodeData['seasonNumber'] = season_number
                 episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
                 episodeData['episodeNumber'] = episode_number
-                if episodeData['airDate'] < time.gmtime()[:3]:
-                    continue
                 showData['episodes'].append(episodeData)
             except ValueError as e:
                 _LOGGER.warning("Unexpected error during parsing episode data of: " + showData['title'] + " " + season('tr>td>h2').text())

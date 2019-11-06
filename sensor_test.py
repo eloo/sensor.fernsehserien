@@ -28,11 +28,11 @@ class TestFernsehserien(unittest.TestCase):
             print("Test show: " + show)
             api_response = requests.get(sensor.BASE_URL.format(show), timeout=10)
             show_data = sensor.parseResponse(api_response)
-            # print(show_data)
+            print(show_data)
             self.assertIn('fanart', show_data)
             self.assertIn('title', show_data)
             self.assertIn('episodes', show_data)
-            self.assertGreaterEqual(len(show_data['episodes']), 0)
+            self.assertGreater(len(show_data['episodes']), 0)
 
 if __name__ == '__main__':
     unittest.main()
