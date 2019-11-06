@@ -14,6 +14,7 @@ import time
 import requests
 import re
 from datetime import date, datetime
+from time import mktime
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -26,7 +27,10 @@ _LOGGER = logging.getLogger(__name__)
 
 REQUIREMENTS = ['pyquery==1.4.0']
 
-BASE_URL = "https://www.fernsehserien.de/{0}/episodenguide"
+HOST = "https://www.fernsehserien.de"
+BASE_URL = HOST + "/{0}/episodenguide"
+FANART_BASE_URL = "https://bilder.fernsehserien.de/gfx/bv/{0}.jpg"
+
 CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
 CONF_MAX = 'max'
@@ -48,6 +52,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
 
     def __init__(self, hass, conf):
         from pytz import timezone
+        self.host = HOST
         self.urlbase = BASE_URL
         self.days = int(conf.get(CONF_DAYS))
         self.showNames = conf.get(CONF_SHOW_NAME)
@@ -83,19 +88,13 @@ class FernsehserienUpcomingMediaSensor(Entity):
         for show in self.data:
             for episode in show['episodes']:
                 card_item = {}
-        #     if 'series' not in show:
-        #         continue
+
                 card_item['airdate'] = episode['airDate']
                 card_item['aired'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', episode['airDate'])
-        #     if days_until(show['airDateUtc'], self._tz) <= 7:
-        #         card_item['release'] = '$day, $time'
-        #     else:
-        #         card_item['release'] = '$day, $date $time'
-        #     card_item['flag'] = show.get('hasFile', False)
+
                 if 'title' in show:
                     card_item['title'] = show['title']
-        #     else:
-        #         continue
+
                 card_item['episode'] = episode['title']
                 if 'seasonNumber' and 'episodeNumber' in episode:
                     card_item['number'] = 'S{:02d}E{:02d}'.format(episode['seasonNumber'],
@@ -108,8 +107,6 @@ class FernsehserienUpcomingMediaSensor(Entity):
         return attributes
 
     def update(self):
-        start = get_date(self._tz)
-        end = get_date(self._tz, self.days)
         result = []
         for showName in self.showNames:
             try:
@@ -123,13 +120,18 @@ class FernsehserienUpcomingMediaSensor(Entity):
             if api_response.status_code == 200:
                 self._state = 'Online'
                 data = parseResponse(api_response)
-                # if episodeData['airDate'] < time.gmtime()[:3]:
-                #     continue
-                # data = list(filter(lambda x: x['airDate'] > time.gmtime(), data))
+                data['fanart'] = FANART_BASE_URL.format(showName)
+                data['episodes'] = filter_upcoming(data['episodes'], showName, date.today())
+
                 result.append(data)
                 self.data = result
             else:
                 self._state = '%s cannot be reached' % self.host
+
+
+def filter_upcoming(episodes, showName, date):
+    return list(filter(lambda x: datetime.fromtimestamp(mktime(x['airDate'])).date() > date, episodes))
+
 
 def parse_episode_number(episode):
     number = episode[4].text()
@@ -143,7 +145,7 @@ def parse_episode_airdate(episode):
     airdate = ''
     try:
         airdate = time.strptime(ea, "%d.%m.%Y")
-    except ValueError as e:
+    except ValueError:
         ea = episode[6].remove('span').text()
         airdate = time.strptime(ea, "%d.%m.%Y")
     return airdate
@@ -155,8 +157,6 @@ def parseResponse(response):
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
     seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
     showData = {}
-    fanartUrl = pq('div>a>img').attr['src']
-    showData['fanart'] = fanartUrl
     showData['title'] = show_title
     showData['episodes'] = []
     for season in seasons:
@@ -177,7 +177,7 @@ def parseResponse(response):
                 episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
                 episodeData['episodeNumber'] = episode_number
                 showData['episodes'].append(episodeData)
-            except ValueError as e:
+            except ValueError:
                 _LOGGER.warning("Unexpected error during parsing episode data of: " + showData['title'] + " " + season('tr>td>h2').text())
     return showData
 
