@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ REQUIREMENTS = ['pyquery==1.4.0']
 
 HOST = "https://www.fernsehserien.de"
 BASE_URL = HOST + "/{0}/episodenguide"
-FANART_BASE_URL = "https://bilder.fernsehserien.de/gfx/bv/{0}.jpg"
+FANART_BASE_URL = "https://bilder.fernsehserien.de/sendung/banner/{0}.jpg"
 
 CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
