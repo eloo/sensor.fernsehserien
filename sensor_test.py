@@ -46,6 +46,22 @@ class TestFernsehserien(unittest.TestCase):
         show_data['episodes'] = sensor.filter_upcoming(show_data['episodes'], show, test_date)
         self.assertEqual(len(show_data['episodes']), 6)
 
+    def test_correct_data(self):
+        show = 'vikings'
+        print("Test correct data for: " + show)
+        api_response = requests.get(sensor.BASE_URL.format(show), timeout=10)
+        show_data = sensor.parseResponse(api_response)
+        test_date = datetime.date(2019, 12, 1)
+
+        show_data['episodes'] = sensor.filter_upcoming(show_data['episodes'], show, test_date)
+        first_episode = show_data['episodes'][0]
+        self.assertEqual(first_episode['seasonNumber'], 6)
+        self.assertEqual(first_episode['episodeNumber'], 1)
+        
+        second_episode = show_data['episodes'][1]
+        self.assertEqual(second_episode['seasonNumber'], 6)
+        self.assertEqual(second_episode['episodeNumber'], 2)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -165,7 +165,10 @@ def parseResponse(response):
             try:
                 episodeData = {}
                 episode_number_obj_list = list(episode('td>a').items())
-                season_number = episode_number_obj_list[3].text().replace('.', '')
+                season_number_raw = episode_number_obj_list[3].text()
+                if not season_number_raw.endswith('.'):
+                    season_number_raw = episode_number_obj_list[2].text()
+                season_number = season_number_raw.replace('.', '')
                 episodeData['seasonNumber'] = season_number
                 episode_title = episode('td>a>span').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
                 episodeData['title'] = episode_title
