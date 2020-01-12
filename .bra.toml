@@ -1,0 +1,16 @@
+[run]
+init_cmds = [                      # Commands run in start
+  ["python3", "sensor_test.py"]
+]
+watch_all = true                   # Watch all sub-directories
+watch_dirs = ["."]                    # Directories to watch
+watch_exts = [".yaml", ".py", ".json"]               # Extensions to watch
+env_files = []                     # Load env vars from files
+ignore = [".git", "*/__pycache__"]  # Directories to exclude from watching
+ignore_files = []                  # Regexps for ignoring specific notifies
+follow_symlinks = false            # Enable/disable following symbolic links of sub directories
+build_delay = 1000                 # Minimal interval to Trigger build event
+interrupt_timout = 15              # Time to wait until force kill
+cmds = [                           # Commands to run
+  ["python3", "sensor_test.py"]
+]

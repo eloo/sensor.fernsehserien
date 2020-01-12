@@ -13,7 +13,7 @@ import json
 import time
 import requests
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from time import mktime
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +30,9 @@ REQUIREMENTS = ['pyquery==1.4.0']
 HOST = "https://www.fernsehserien.de"
 BASE_URL = HOST + "/{0}/episodenguide"
 FANART_BASE_URL = "https://bilder.fernsehserien.de/sendung/banner/{0}.jpg"
+
+REQUEST_TIMEOUT = 20
+MAX_RETRIES = 3
 
 CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
@@ -110,7 +113,8 @@ class FernsehserienUpcomingMediaSensor(Entity):
         result = []
         for showName in self.showNames:
             try:
-                api_response = requests.get(BASE_URL.format(showName), timeout=10)
+                requests.adapters.DEFAULT_RETRIES = MAX_RETRIES
+                api_response = requests.get(BASE_URL.format(showName), timeout=REQUEST_TIMEOUT)
 
             except OSError:
                 _LOGGER.warning("Host %s is not available", self.host)
@@ -119,18 +123,14 @@ class FernsehserienUpcomingMediaSensor(Entity):
 
             if api_response.status_code == 200:
                 self._state = 'Online'
-                data = parseResponse(api_response)
+                date = datetime.date.today() - timedelta(1).date
+                data = parseResponse(api_response, date)
                 data['fanart'] = FANART_BASE_URL.format(showName)
-                data['episodes'] = filter_upcoming(data['episodes'], showName, date.today())
 
                 result.append(data)
                 self.data = result
             else:
                 self._state = '%s cannot be reached' % self.host
-
-
-def filter_upcoming(episodes, showName, date):
-    return list(filter(lambda x: datetime.fromtimestamp(mktime(x['airDate'])).date() > date, episodes))
 
 
 def parse_episode_number(episode):
@@ -147,11 +147,13 @@ def parse_episode_airdate(episode):
         airdate = time.strptime(ea, "%d.%m.%Y")
     except ValueError:
         ea = episode[6].remove('span').text()
+        if ea == '':
+            return ''
         airdate = time.strptime(ea, "%d.%m.%Y")
     return airdate
 
 
-def parseResponse(response):
+def parseResponse(response, date):
     from pyquery import PyQuery    
     pq = PyQuery(response.text)
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
@@ -165,6 +167,11 @@ def parseResponse(response):
             try:
                 episodeData = {}
                 episode_number_obj_list = list(episode('td>a').items())
+
+                episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
+                if episodeData['airDate'] == '' or not is_upcoming_episode(episodeData['airDate'], date):
+                    continue
+                
                 season_number_raw = episode_number_obj_list[3].text()
                 if not season_number_raw.endswith('.'):
                     season_number_raw = episode_number_obj_list[2].text()
@@ -178,10 +185,13 @@ def parseResponse(response):
                 episode_number =  parse_episode_number(episode_number_obj_list)
                 episodeData['seasonNumber'] = season_number
                 episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
+                if episodeData['airDate'] == '' or not is_upcoming_episode(episodeData['airDate'], date):
+                    continue
                 episodeData['episodeNumber'] = episode_number
                 showData['episodes'].append(episodeData)
-            except ValueError:
+            except ValueError as e:
                 _LOGGER.warning("Unexpected error during parsing episode data of: " + showData['title'] + " " + season('tr>td>h2').text())
+                _LOGGER.warning(e)
     return showData
 
 def get_date(zone, offset=0):
@@ -189,13 +199,6 @@ def get_date(zone, offset=0):
     return datetime.date(datetime.fromtimestamp(
         time.time() + 86400 * offset, tz=zone))
         
-def days_until(date, tz):
-    from pytz import utc
-    date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
-    date = str(date.replace(tzinfo=utc).astimezone(tz))[:10]
-    date = time.strptime(date, '%Y-%m-%d')
-    date = time.mktime(date)
-    now = datetime.now().strftime('%Y-%m-%d')
-    now = time.strptime(now, '%Y-%m-%d')
-    now = time.mktime(now)
-    return int((date - now) / 86400)
+def is_upcoming_episode(airDate, date):
+    air_date_object = datetime.fromtimestamp(mktime(airDate)).date()
+    return air_date_object > date
