@@ -4,5 +4,5 @@
     "documentation": "n/a",
     "dependencies": [],
     "codeowners": [],
-    "requirements": ["pyquery==1.4.0"]
+    "requirements": ["pyquery==1.4.1"]
   }

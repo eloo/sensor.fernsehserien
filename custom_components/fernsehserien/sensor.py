@@ -21,11 +21,11 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['pyquery==1.4.0']
+REQUIREMENTS = ['pyquery==1.4.1']
 
 HOST = "https://www.fernsehserien.de"
 BASE_URL = HOST + "/{0}/episodenguide"
