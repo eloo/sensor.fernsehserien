@@ -13,7 +13,7 @@ import json
 import time
 import requests
 import re
-from datetime import date, datetime, timedelta
+import datetime
 from time import mktime
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
@@ -75,7 +75,6 @@ class FernsehserienUpcomingMediaSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        # import re
         # """Return JSON for the sensor."""
         attributes = {}
         default = {}
@@ -115,7 +114,6 @@ class FernsehserienUpcomingMediaSensor(Entity):
             try:
                 requests.adapters.DEFAULT_RETRIES = MAX_RETRIES
                 api_response = requests.get(BASE_URL.format(showName), timeout=REQUEST_TIMEOUT)
-
             except OSError:
                 _LOGGER.warning("Host %s is not available", self.host)
                 self._state = '%s cannot be reached' % self.host
@@ -123,7 +121,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
 
             if api_response.status_code == 200:
                 self._state = 'Online'
-                date = datetime.date.today() - timedelta(1).date()
+                date = get_date()
                 data = parseResponse(api_response, date)
                 data['fanart'] = FANART_BASE_URL.format(showName)
 
@@ -132,6 +130,8 @@ class FernsehserienUpcomingMediaSensor(Entity):
             else:
                 self._state = '%s cannot be reached' % self.host
 
+def get_date():
+    return datetime.date.today() - datetime.timedelta(1)
 
 def parse_episode_number(episode):
     number = episode[4].text()
@@ -194,11 +194,6 @@ def parseResponse(response, date):
                 _LOGGER.warning(e)
     return showData
 
-def get_date(zone, offset=0):
-    """Get date based on timezone and offset of days."""
-    return datetime.date(datetime.fromtimestamp(
-        time.time() + 86400 * offset, tz=zone))
-        
 def is_upcoming_episode(airDate, date):
-    air_date_object = datetime.fromtimestamp(mktime(airDate)).date()
+    air_date_object = datetime.datetime.fromtimestamp(mktime(airDate)).date()
     return air_date_object > date

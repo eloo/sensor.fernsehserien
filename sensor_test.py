@@ -1,10 +1,8 @@
 import unittest
 import requests
 import custom_components.fernsehserien.sensor as sensor
-import datetime 
 import logging
-from datetime import date, timedelta
-
+import datetime
 
 # logging.basicConfig(level=logging.DEBUG)
 sensor._LOGGER.setLevel(logging.DEBUG)
@@ -36,6 +34,8 @@ class TestFernsehserien(unittest.TestCase):
         Any method which starts with ``test_`` will considered as a test case.
         """
         test_date = datetime.date(2019, 1, 1)
+        # test_date = datetime.date.today() - datetime.timedelta(1)
+
         print("Test date used: ", test_date)
         for show in self.test_data:
             print("Test parse for show: " + show)
@@ -71,6 +71,8 @@ class TestFernsehserien(unittest.TestCase):
         self.assertEqual(second_episode['seasonNumber'], 6)
         self.assertEqual(second_episode['episodeNumber'], 2)
 
+    def test_get_date(self):
+        self.assertIsNotNone(sensor.get_date())
 
 if __name__ == '__main__':
     unittest.main()
