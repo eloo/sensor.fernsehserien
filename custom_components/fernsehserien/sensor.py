@@ -123,7 +123,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
 
             if api_response.status_code == 200:
                 self._state = 'Online'
-                date = datetime.date.today() - timedelta(1).date
+                date = datetime.date.today() - timedelta(1).date()
                 data = parseResponse(api_response, date)
                 data['fanart'] = FANART_BASE_URL.format(showName)
 
