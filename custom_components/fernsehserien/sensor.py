@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.5'
+__version__ = '0.1.7'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ REQUIREMENTS = ['pyquery==1.4.1']
 
 HOST = "https://www.fernsehserien.de"
 BASE_URL = HOST + "/{0}/episodenguide"
-FANART_BASE_URL = "https://bilder.fernsehserien.de/sendung/banner/{0}.jpg"
+FANART_BASE_URL = "https://bilder.fernsehserien.de/gfx/bv/{0}.jpg"
 
 REQUEST_TIMEOUT = 20
 MAX_RETRIES = 3
@@ -122,8 +122,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
             if api_response.status_code == 200:
                 self._state = 'Online'
                 date = get_date()
-                data = parseResponse(api_response, date)
-                data['fanart'] = FANART_BASE_URL.format(showName)
+                data = parseResponse(showName, api_response, date)
 
                 result.append(data)
                 self.data = result
@@ -153,13 +152,15 @@ def parse_episode_airdate(episode):
     return airdate
 
 
-def parseResponse(response, date):
+def parseResponse(show, response, date):
     from pyquery import PyQuery    
     pq = PyQuery(response.text)
+    showData = {}
+    showData['fanart'] = pq.find('.serie-image-large').find('img')[0].attrib['src']
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
     seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
-    showData = {}
     showData['title'] = show_title
+    
     showData['episodes'] = []
     for season in seasons:
         episodes = season('tr').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'episode').items()

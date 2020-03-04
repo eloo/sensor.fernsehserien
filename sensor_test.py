@@ -17,15 +17,15 @@ class TestFernsehserien(unittest.TestCase):
     _LOGGER.setLevel(logging.DEBUG)
 
     test_data = [
+        'gomorrha-die-serie',
         'game-of-thrones',
         'vikings',
         'brooklyn-nine-nine',
         'doctor-who-2005',
         'the-big-bang-theory',
         'suits',
-        'hubert-ohne-staller',
-        'young-sheldon',
-        'gomorrha-die-serie'
+        'hubert-und-staller',
+        'young-sheldon'
     ]
 
     def test_parse(self):
@@ -41,7 +41,7 @@ class TestFernsehserien(unittest.TestCase):
             print("Test parse for show: " + show)
             requests.adapters.DEFAULT_RETRIES = sensor.MAX_RETRIES
             api_response = requests.get(sensor.BASE_URL.format(show), timeout=sensor.REQUEST_TIMEOUT)
-            show_data = sensor.parseResponse(api_response, test_date)
+            show_data = sensor.parseResponse(show, api_response, test_date)
             print("Episodes found: " + str(len(show_data['episodes'])))
             self.assertIn('title', show_data)
             self.assertIn('episodes', show_data)
@@ -52,7 +52,7 @@ class TestFernsehserien(unittest.TestCase):
         print("Test filter for show: " + show)
         api_response = requests.get(sensor.BASE_URL.format(show), timeout=10)
         test_date = datetime.date(2019, 1, 1)
-        show_data = sensor.parseResponse(api_response, test_date)
+        show_data = sensor.parseResponse(show, api_response, test_date)
 
         self.assertEqual(len(show_data['episodes']), 6)
 
@@ -61,7 +61,7 @@ class TestFernsehserien(unittest.TestCase):
         print("Test correct data for: " + show)
         api_response = requests.get(sensor.BASE_URL.format(show), timeout=10)
         test_date = datetime.date(2019, 12, 1)
-        show_data = sensor.parseResponse(api_response, test_date)
+        show_data = sensor.parseResponse(show, api_response, test_date)
 
         first_episode = show_data['episodes'][0]
         self.assertEqual(first_episode['seasonNumber'], 6)
@@ -73,6 +73,25 @@ class TestFernsehserien(unittest.TestCase):
 
     def test_get_date(self):
         self.assertIsNotNone(sensor.get_date())
+
+
+    def test_has_fanart(self):
+        """
+        The actual test.
+        Any method which starts with ``test_`` will considered as a test case.
+        """
+        test_date = datetime.date(2019, 1, 1)
+        # test_date = datetime.date.today() - datetime.timedelta(1)
+
+        print("Test date used: ", test_date)
+        for show in self.test_data:
+            print("Test parse for show: " + show)
+            requests.adapters.DEFAULT_RETRIES = sensor.MAX_RETRIES
+            api_response = requests.get(sensor.BASE_URL.format(show), timeout=sensor.REQUEST_TIMEOUT)
+            show_data = sensor.parseResponse(show, api_response, test_date)
+            print(show_data['fanart'])
+            api_response = requests.get(show_data['fanart'])
+            self.assertEqual(api_response.status_code, 200, "Fanart not found at: '{}'".format(show_data['fanart']))
 
 if __name__ == '__main__':
     unittest.main()
