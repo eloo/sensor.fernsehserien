@@ -54,7 +54,7 @@ class TestFernsehserien(unittest.TestCase):
         test_date = datetime.date(2019, 1, 1)
         show_data = sensor.parseResponse(show, api_response, test_date)
 
-        self.assertEqual(len(show_data['episodes']), 6)
+        self.assertEqual(len(show_data['episodes']), 12)
 
     def test_correct_data(self):
         show = 'vikings'
