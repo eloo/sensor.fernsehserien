@@ -156,7 +156,7 @@ def parseResponse(show, response, date):
     from pyquery import PyQuery    
     pq = PyQuery(response.text)
     showData = {}
-    showData['fanart'] = pq.find('.serie-image-large').find('img')[0].attrib['src']
+    showData['fanart'] = pq.find('.serienlogo').find('img')[0].attrib['src']
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
     seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
     showData['title'] = show_title
@@ -180,7 +180,7 @@ def parseResponse(show, response, date):
                 episodeData['seasonNumber'] = season_number
                 episode_title = episode('td>a>span').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
                 episodeData['title'] = episode_title
-                if season_number is '' or episode_title is '':
+                if season_number == '' or episode_title == '':
                     continue
                 season_number = int(season_number)
                 episode_number =  parse_episode_number(episode_number_obj_list)
