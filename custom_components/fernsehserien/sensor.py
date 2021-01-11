@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.1.7'
+__version__ = '0.2.0'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,13 +37,15 @@ MAX_RETRIES = 3
 CONF_SHOW_NAME = 'showNames'
 CONF_DAYS = 'days'
 CONF_MAX = 'max'
+CONF_MAX_PER_SHOW = "max_per_show"
 
 DOMAIN = 'fernsehserien_upcoming_media'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_SHOW_NAME): cv.ensure_list,
-    vol.Optional(CONF_DAYS, default='7'): cv.string,    
-    vol.Optional(CONF_MAX, default=5): cv.string,
+    vol.Optional(CONF_DAYS, default=7): cv.positive_int,    
+    vol.Optional(CONF_MAX, default=5): cv.positive_int,
+    vol.Optional(CONF_MAX_PER_SHOW, default=3): cv.positive_int,
 })
 
 
@@ -57,12 +59,13 @@ class FernsehserienUpcomingMediaSensor(Entity):
         from pytz import timezone
         self.host = HOST
         self.urlbase = BASE_URL
-        self.days = int(conf.get(CONF_DAYS))
+        self.days = conf.get(CONF_DAYS)
         self.showNames = conf.get(CONF_SHOW_NAME)
         self._state = None
         self.data = []
         self._tz = timezone(str(hass.config.time_zone))
-        self.max_items = int(conf.get(CONF_MAX))
+        self.max_items = conf.get(CONF_MAX)
+        self.max_per_show_items = conf.get(CONF_MAX_PER_SHOW)
 
     @property
     def name(self):
@@ -88,6 +91,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
         card_json.append(default)
         episode_list = []
         for show in self.data:
+            show_episode_list = []
             for episode in show['episodes']:
                 card_item = {}
 
@@ -102,7 +106,9 @@ class FernsehserienUpcomingMediaSensor(Entity):
                     card_item['number'] = 'S{:02d}E{:02d}'.format(episode['seasonNumber'],
                                                         episode['episodeNumber'])
                 card_item['fanart'] = show['fanart']
-                episode_list.append(card_item)
+                show_episode_list.append(card_item)
+            show_episode_list = sorted(show_episode_list, key=lambda x: x['airdate'])
+            episode_list.extend(show_episode_list[:self.max_per_show_items])
         episode_list = sorted(episode_list, key=lambda x: x['airdate'])
         card_json.extend(episode_list)
         attributes['data'] = json.dumps(card_json)
