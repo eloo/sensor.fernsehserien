@@ -164,16 +164,16 @@ def parseResponse(show, response, date):
     showData = {}
     showData['fanart'] = pq.find('.serienlogo').find('img')[0].attrib['src']
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
-    seasons = pq('tbody').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
+    seasons = pq('div>section').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
     showData['title'] = show_title
     
     showData['episodes'] = []
     for season in seasons:
-        episodes = season('tr').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'episode').items()
+        episodes = season('div>a').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'url').items()
         for episode in episodes:
             try:
                 episodeData = {}
-                episode_number_obj_list = list(episode('td>a').items())
+                episode_number_obj_list = list(episode('div').items())
 
                 episodeData['airDate'] = parse_episode_airdate(episode_number_obj_list)
                 if episodeData['airDate'] == '' or not is_upcoming_episode(episodeData['airDate'], date):
@@ -184,7 +184,7 @@ def parseResponse(show, response, date):
                     season_number_raw = episode_number_obj_list[2].text()
                 season_number = season_number_raw.replace('.', '')
                 episodeData['seasonNumber'] = season_number
-                episode_title = episode('td>a>span').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
+                episode_title = episode_number_obj_list[6]("span").filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
                 episodeData['title'] = episode_title
                 if season_number == '' or episode_title == '':
                     continue
