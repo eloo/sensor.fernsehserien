@@ -3,6 +3,10 @@
     "name": "Scrapper for fernsehserien.de",
     "documentation": "n/a",
     "dependencies": [],
-    "codeowners": [],
+    "config_flow": false,
+    "version": "0.0.1",
+    "codeowners": [
+      "@eloo"
+    ],
     "requirements": ["pyquery==1.4.1"]
   }
