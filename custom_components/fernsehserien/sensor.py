@@ -21,7 +21,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -164,12 +164,12 @@ def parseResponse(show, response, date):
     showData = {}
     showData['fanart'] = pq.find('.serienlogo').find('img')[0].attrib['src']
     show_title = pq('h1>a').filter(lambda i, this: PyQuery(this).attr['data-event-category'] == 'serientitel').remove('span').text()
-    seasons = pq('div>section').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items()
+    showData['seasons'] = list(pq('div>section').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'containsSeason').items())
     showData['title'] = show_title
     
     showData['episodes'] = []
-    for season in seasons:
-        episodes = season('div>a').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'url').items()
+    for season in showData['seasons']:
+        episodes = season('div>a').filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'episode').items()
         for episode in episodes:
             try:
                 episodeData = {}
