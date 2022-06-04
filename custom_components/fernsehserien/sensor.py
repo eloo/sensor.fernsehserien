@@ -77,7 +77,7 @@ class FernsehserienUpcomingMediaSensor(Entity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         # """Return JSON for the sensor."""
         attributes = {}
         default = {}

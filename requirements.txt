@@ -1,3 +1,7 @@
 voluptuous
 homeassistant
 pyquery
+pyyaml
+pytest
+pytest-homeassistant-custom-component
+poetry
