@@ -14,6 +14,7 @@ import time
 import requests
 import re
 import datetime
+from datetime import timedelta
 from time import mktime
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
@@ -186,7 +187,7 @@ def parseResponse(show, response, date):
                 episodeData['seasonNumber'] = season_number
                 episode_title = episode_number_obj_list[6]("span").filter(lambda i, this: PyQuery(this).attr['itemprop'] == 'name').text()
                 episodeData['title'] = episode_title
-                if season_number == '' or episode_title == '':
+                if season_number == '':
                     continue
                 season_number = int(season_number)
                 episode_number =  parse_episode_number(episode_number_obj_list)
@@ -203,4 +204,4 @@ def parseResponse(show, response, date):
 
 def is_upcoming_episode(airDate, date):
     air_date_object = datetime.datetime.fromtimestamp(mktime(airDate)).date()
-    return air_date_object > date
+    return air_date_object > date - timedelta(days = 1)

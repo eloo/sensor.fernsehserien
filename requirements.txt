@@ -3,5 +3,6 @@ homeassistant
 pyquery
 pyyaml
 pytest
-pytest-homeassistant-custom-component
+pytest-homeassistant-custom-component==0.13.3
 poetry
+# pytest-socket==0.6.0
