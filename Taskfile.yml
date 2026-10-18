@@ -33,3 +33,8 @@ tasks:
       - task: dependencies
       - task: lint
       - task: test
+
+  push-tags:
+    desc: Push all local Git tags to origin
+    cmds:
+      - git push origin --tags
