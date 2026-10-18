@@ -13,7 +13,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from pyquery import PyQuery
 
-from .const import BASE_URL, DEFAULT_SCAN_INTERVAL, MAX_PER_SHOW, REQUEST_TIMEOUT
+from .const import BASE_URL, DEFAULT_MAX_PER_SHOW, REQUEST_TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,14 +21,22 @@ _LOGGER = logging.getLogger(__name__)
 class FernsehserienCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 	"""Coordinate updates for all configured series."""
 
-	def __init__(self, hass: HomeAssistant, shows: list[str]) -> None:
+	def __init__(
+		self,
+		hass: HomeAssistant,
+		shows: list[str],
+		*,
+		scan_interval: int,
+		max_per_show: int,
+	) -> None:
 		self.shows = shows
+		self.max_per_show = max_per_show
 		self.session = async_get_clientsession(hass)
 		super().__init__(
 			hass,
 			_LOGGER,
 			name="Fernsehserien.de",
-			update_interval=DEFAULT_SCAN_INTERVAL,
+			update_interval=dt.timedelta(seconds=scan_interval),
 		)
 
 	async def _async_update_data(self) -> dict[str, Any]:
@@ -43,14 +51,24 @@ class FernsehserienCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 					response.raise_for_status()
 					html = await response.text()
 				results.append(
-					_parse_response(show, html, dt.date.today() - dt.timedelta(days=1))
+					_parse_response(
+						show,
+						html,
+						dt.date.today() - dt.timedelta(days=1),
+						self.max_per_show,
+					)
 				)
 			except (aiohttp.ClientError, TimeoutError, ValueError, IndexError) as err:
 				raise UpdateFailed(f"Fehler beim Abrufen von {show}") from err
 		return {"shows": results}
 
 
-def _parse_response(show: str, html: str, date: dt.date) -> dict[str, Any]:
+def _parse_response(
+	show: str,
+	html: str,
+	date: dt.date,
+	max_per_show: int = DEFAULT_MAX_PER_SHOW,
+) -> dict[str, Any]:
 	"""Parse a Fernsehserien.de episode guide."""
 	pq = PyQuery(html)
 	logo = pq.find(".serienlogo img").eq(0)
@@ -104,5 +122,5 @@ def _parse_response(show: str, html: str, date: dt.date) -> dict[str, Any]:
 					"Episode von %s konnte nicht geparst werden", show, exc_info=True
 				)
 	result["episodes"].sort(key=lambda episode: episode["airDate"])
-	result["episodes"] = result["episodes"][:MAX_PER_SHOW]
+	result["episodes"] = result["episodes"][:max_per_show]
 	return result

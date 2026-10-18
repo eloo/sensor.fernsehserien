@@ -3,9 +3,11 @@
     "step": {
       "user": {
         "title": "Serien hinzufügen",
-        "description": "Gib die URL-Slugs der Serien auf fernsehserien.de ein, einen pro Zeile. Beispiel: breaking-bad",
+        "description": "Gib die URL-Slugs der Serien auf fernsehserien.de ein, einen pro Zeile. Beispiel: breaking-bad. Aktualisierungsintervall in Sekunden und maximale Folgenzahl je Serie sind einstellbar.",
         "data": {
-          "shows": "Serien-Slugs"
+          "shows": "Serien-Slugs",
+          "scan_interval": "Aktualisierungsintervall (Sekunden)",
+          "max_per_show": "Maximale Folgen je Serie"
         }
       }
     },
@@ -22,9 +24,11 @@
     "step": {
       "init": {
         "title": "Serien verwalten",
-        "description": "Eine Serie pro Zeile. Füge Slugs hinzu oder lösche Zeilen, um Serien zu entfernen.",
+        "description": "Eine Serie pro Zeile. Füge Slugs hinzu oder lösche Zeilen, um Serien zu entfernen. Du kannst außerdem Aktualisierungsintervall und maximale Folgenzahl je Serie ändern.",
         "data": {
-          "shows": "Serien-Slugs"
+          "shows": "Serien-Slugs",
+          "scan_interval": "Aktualisierungsintervall (Sekunden)",
+          "max_per_show": "Maximale Folgen je Serie"
         }
       }
     },

@@ -3,9 +3,11 @@
     "step": {
       "user": {
         "title": "Add series",
-        "description": "Enter fernsehserien.de URL slugs, one per line. Example: breaking-bad",
+        "description": "Enter fernsehserien.de URL slugs, one per line. Example: breaking-bad. Configure the refresh interval in seconds and maximum episodes per show.",
         "data": {
-          "shows": "Series slugs"
+          "shows": "Series slugs",
+          "scan_interval": "Refresh interval (seconds)",
+          "max_per_show": "Maximum episodes per show"
         }
       }
     },
@@ -22,9 +24,11 @@
     "step": {
       "init": {
         "title": "Manage series",
-        "description": "One series per line. Add slugs or delete lines to remove series.",
+        "description": "One series per line. Add slugs or delete lines to remove series. You can also change the refresh interval and maximum episodes per show.",
         "data": {
-          "shows": "Series slugs"
+          "shows": "Series slugs",
+          "scan_interval": "Refresh interval (seconds)",
+          "max_per_show": "Maximum episodes per show"
         }
       }
     },

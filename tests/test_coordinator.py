@@ -13,3 +13,16 @@ def test_parse_response_rejects_unrecognized_page() -> None:
         assert "Serienlogo" in str(err)
     else:
         raise AssertionError("Expected malformed page to fail parsing")
+
+
+def test_parse_response_respects_max_per_show() -> None:
+    """Parser takes a caller-provided per-show episode limit."""
+    # Page without episode rows parses to an empty list at any configured limit.
+    show = _parse_response(
+        "test-show",
+        '<div class="serienlogo"><img src="/logo.jpg"></div>'
+        '<h1><a>Test Show</a></h1>',
+        dt.date.today(),
+        max_per_show=2,
+    )
+    assert show["episodes"] == []
