@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Serien hinzufügen",
+        "description": "Gib die URL-Slugs der Serien auf fernsehserien.de ein, einen pro Zeile. Beispiel: breaking-bad",
+        "data": {
+          "shows": "Serien-Slugs"
+        }
+      }
+    },
+    "error": {
+      "no_shows": "Füge mindestens eine Serie hinzu.",
+      "invalid_show": "Nur Kleinbuchstaben, Zahlen und Bindestriche sind erlaubt."
+    },
+    "abort": {
+      "already_configured": "Die Integration ist bereits eingerichtet.",
+      "invalid_import": "Die alten YAML-Serien konnten nicht importiert werden."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Serien verwalten",
+        "description": "Eine Serie pro Zeile. Füge Slugs hinzu oder lösche Zeilen, um Serien zu entfernen.",
+        "data": {
+          "shows": "Serien-Slugs"
+        }
+      }
+    },
+    "error": {
+      "no_shows": "Füge mindestens eine Serie hinzu oder entferne alle Zeilen.",
+      "invalid_show": "Nur Kleinbuchstaben, Zahlen und Bindestriche sind erlaubt."
+    }
+  }
+}

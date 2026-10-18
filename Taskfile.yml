@@ -1,0 +1,35 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Run dependency check, lint, and tests
+    cmds:
+      - task: check
+
+  dependencies:
+    desc: Check manifest requirements match UV development dependencies
+    cmds:
+      - uv run pytest -q tests/test_manifest_dependencies.py
+
+  test:
+    desc: Run all pytest tests
+    deps: [dependencies]
+    cmds:
+      - uv run pytest
+
+  lint:
+    desc: Run Ruff checks on integration and maintained tests
+    cmds:
+      - >-
+        uv run ruff check
+        custom_components/fernsehserien
+        tests/test_config_flow.py
+        tests/test_coordinator.py
+        tests/test_manifest_dependencies.py
+
+  check:
+    desc: Run all project checks
+    cmds:
+      - task: dependencies
+      - task: lint
+      - task: test

@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add series",
+        "description": "Enter fernsehserien.de URL slugs, one per line. Example: breaking-bad",
+        "data": {
+          "shows": "Series slugs"
+        }
+      }
+    },
+    "error": {
+      "no_shows": "Add at least one series.",
+      "invalid_show": "Only lowercase letters, numbers, and hyphens are allowed."
+    },
+    "abort": {
+      "already_configured": "Integration is already configured.",
+      "invalid_import": "Could not import the legacy YAML series."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage series",
+        "description": "One series per line. Add slugs or delete lines to remove series.",
+        "data": {
+          "shows": "Series slugs"
+        }
+      }
+    },
+    "error": {
+      "no_shows": "Add at least one series or remove all lines.",
+      "invalid_show": "Only lowercase letters, numbers, and hyphens are allowed."
+    }
+  }
+}

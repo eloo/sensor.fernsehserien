@@ -1,0 +1,30 @@
+[project]
+name = "homeassistant-fernsehserien"
+version = "1.0.0"
+description = "Home Assistant custom integration for upcoming Fernsehserien.de episodes"
+requires-python = ">=3.14.2"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyquery==2.1.0",
+    "pytest>=8.3",
+    "pytest-homeassistant-custom-component>=0.13.373",
+    "poetry>=2.0",
+    "ruff>=0.14",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
